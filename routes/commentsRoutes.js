@@ -1,13 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const commentsController = require('../controllers/commentsController');
-const { authenticateJWT } = require('../middlewares/authMiddleware'); // ADD THIS
+const { authenticateJWT } = require('../middlewares/authMiddleware');
+const authorizeSelfOrAdmin = require('../middlewares/canEditMiddleware');
+const getCommentMiddleware = require('../middlewares/getCommentMiddleware');
 
-router.get('/', commentsController.getComments);
-router.get('/:id', commentsController.getCommentById);
-router.post('/', authenticateJWT, commentsController.createComment); // ADD MIDDLEWARE HERE
-router.put('/:id', authenticateJWT, commentsController.updateComment); // Optional: Add middleware for other routes
-router.delete('/:id', authenticateJWT, commentsController.deleteComment); // Optional: Add middleware for other routes
-router.get('/article/:articleId', commentsController.getCommentsByArticleId);
+// Update protected routes
+router.put('/:id', 
+  authenticateJWT,
+  getCommentMiddleware,
+  authorizeSelfOrAdmin,
+  commentsController.updateComment
+);
+
+router.delete('/:id', 
+  authenticateJWT,
+  getCommentMiddleware,
+  authorizeSelfOrAdmin,
+  commentsController.deleteComment
+);
 
 module.exports = router;

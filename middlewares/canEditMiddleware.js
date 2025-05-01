@@ -1,10 +1,12 @@
 
-//canEditMiddleware.js
 const authorizeSelfOrAdmin = (req, res, next) => {
-    if (req.user.role === 'admin' || req.user.id === req.params.id) {
-        return next();
+    // Compare using 'id' from token
+    const isOwner = req.comment.user.toString() === req.user.id;
+    
+    if (req.user.role === 'admin' || isOwner) {
+      return next();
     }
     return res.status(403).json({ message: 'Forbidden' });
-};
-
-module.exports = authorizeSelfOrAdmin;
+  };
+  
+  module.exports = authorizeSelfOrAdmin;

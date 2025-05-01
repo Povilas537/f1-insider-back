@@ -26,21 +26,20 @@ const getCommentsByArticleId = async (req, res) => {
     try {
         const { articleId } = req.params;
         const comments = await Comment.find({ article: articleId })
-            .populate('user', 'username')
-            .sort({ createdAt: -1 });
+        .populate('user', 'username _id') // Ensure _id is populated
+        .sort({ createdAt: -1 });
         res.send(comments);
     } catch (error) {
         res.status(500).send(error);
     }
 }
 
+// Update createComment to use 'id' from token
 const createComment = async (req, res) => {
     try {
-         
-    console.log(req.user);
       const commentData = {
         ...req.body,
-        user: req.user.id // <-- Ensure this matches the token payload key
+        user: req.user.id // Match token's 'id' field
       };
       const comment = new Comment(commentData);
       await comment.save();
