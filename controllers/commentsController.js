@@ -22,6 +22,18 @@ const getCommentById = async (req, res) => {
     }
 }
 
+const getCommentsByArticleId = async (req, res) => {
+    try {
+        const { articleId } = req.params;
+        const comments = await Comment.find({ article: articleId })
+            .populate('user', 'username')
+            .sort({ createdAt: -1 });
+        res.send(comments);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
 const createComment = async (req, res) => {
     try {
          
@@ -37,40 +49,35 @@ const createComment = async (req, res) => {
       res.status(500).send(error);
     }
   };
+// Update updateComment
 const updateComment = async (req, res) => {
     try {
-        const { id } = req.params
-        const updatedComment = await Comment.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true }
-        )
-        if (!updatedComment) {
-            return res.status(404).send({ error: 'Comment not found' })
-        }
-        res.send(updatedComment)
+      // Use the comment from middleware
+      req.comment.content = req.body.content;
+      const updatedComment = await req.comment.save();
+      res.send(updatedComment);
     } catch (error) {
-        res.status(500).send(error)
+      res.status(500).send(error);
     }
-}
-
+  };
+// Update deleteComment
 const deleteComment = async (req, res) => {
     try {
-        const { id } = req.params
-        const deletedComment = await Comment.findByIdAndDelete(id)
-        if (!deletedComment) {
-            return res.status(404).send({ error: 'Comment not found' })
-        }
-        res.send({ message: 'Comment was removed', data: deletedComment })
+      await req.comment.deleteOne();
+      res.send({ 
+        message: 'Comment was removed', 
+        data: req.comment 
+      });
     } catch (error) {
-        res.status(500).send(error)
+      res.status(500).send(error);
     }
-}
+  };
 
 module.exports = {
     getComments,
     getCommentById,
     createComment,
     updateComment,
-    deleteComment
+    deleteComment,
+    getCommentsByArticleId
 }
