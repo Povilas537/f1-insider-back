@@ -1,71 +1,85 @@
-const Article = require('../models/articleModel')
+const Article = require('../models/articleModel');
 
-const getArticles = async (req, res) => {
-    try {
-        const articles = await Article.find().populate('author', 'username')
-        res.send(articles)
-    } catch (error) {
-        res.status(500).send(error)
-    }
-}
+// Get all articles
+const getArticles = async (req, res, next) => {
+  try {
+    const articles = await Article.find().populate('author', 'username');
+    res.status(200).json({ data: articles });
+  } catch (error) {
+    next(error);
+  }
+};
 
-const getArticleById = async (req, res) => {
+// Get article by ID
+const getArticleById = async (req, res, next) => {
     try {
-        const { id } = req.params
-        const article = await Article.findById(id).populate('author', 'username')
-        if (!article) {
-            return res.status(404).send({ error: 'Article not found' })
-        }
-        res.send(article)
+      const { id } = req.params;
+      const article = await Article.findById(id)
+        .populate('author', 'username')
+        .populate({
+          path: 'comments',
+          populate: { path: 'author', select: 'username' }
+        }); // populate comments and their authors
+  
+      if (!article) {
+        return res.status(404).json({ error: 'Article not found' });
+      }
+  
+      res.status(200).json({ data: article });
     } catch (error) {
-        res.status(500).send(error)
+      next(error);
     }
-}
+  };
+// Create article
+const createArticle = async (req, res, next) => {
+    try {
+      // Add validation here if needed
+      const article = new Article({
+        ...req.body,
+        author: req.user.id // Set the author to the authenticated user's ID
+      });
+      await article.save();
+      res.status(201).json({ data: article });
+    } catch (error) {
+      next(error);
+    }
+  };
+// Update article
+const updateArticle = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updatedArticle = await Article.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedArticle) {
+      return res.status(404).json({ error: 'Article not found' });
+    }
+    res.status(200).json({ data: updatedArticle });
+  } catch (error) {
+    next(error);
+  }
+};
 
-const createArticle = async (req, res) => {
-    try {
-        const article = new Article(req.body)
-        await article.save()
-        res.send(article)
-    } catch (error) {
-        res.status(500).send(error)
+// Delete article
+const deleteArticle = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deletedArticle = await Article.findByIdAndDelete(id);
+    if (!deletedArticle) {
+      return res.status(404).json({ error: 'Article not found' });
     }
-}
-
-const updateArticle = async (req, res) => {
-    try {
-        const { id } = req.params
-        const updatedArticle = await Article.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true }
-        )
-        if (!updatedArticle) {
-            return res.status(404).send({ error: 'Article not found' })
-        }
-        res.send(updatedArticle)
-    } catch (error) {
-        res.status(500).send(error)
-    }
-}
-
-const deleteArticle = async (req, res) => {
-    try {
-        const { id } = req.params
-        const deletedArticle = await Article.findByIdAndDelete(id)
-        if (!deletedArticle) {
-            return res.status(404).send({ error: 'Article not found' })
-        }
-        res.send({ message: 'Article was removed', data: deletedArticle })
-    } catch (error) {
-        res.status(500).send(error)
-    }
-}
+    res.status(200).json({ message: 'Article was removed', data: deletedArticle });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
-    getArticles,
-    getArticleById,
-    createArticle,
-    updateArticle,
-    deleteArticle
-}
+  getArticles,
+  getArticleById,
+  createArticle,
+  updateArticle,
+  deleteArticle,
+};

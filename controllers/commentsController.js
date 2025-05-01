@@ -24,14 +24,19 @@ const getCommentById = async (req, res) => {
 
 const createComment = async (req, res) => {
     try {
-        const comment = new Comment(req.body)
-        await comment.save()
-        res.send(comment)
+         
+    console.log(req.user);
+      const commentData = {
+        ...req.body,
+        user: req.user.id // <-- Ensure this matches the token payload key
+      };
+      const comment = new Comment(commentData);
+      await comment.save();
+      res.status(201).send(comment);
     } catch (error) {
-        res.status(500).send(error)
+      res.status(500).send(error);
     }
-}
-
+  };
 const updateComment = async (req, res) => {
     try {
         const { id } = req.params

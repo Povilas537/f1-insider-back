@@ -35,8 +35,9 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).send(error);
-    }
+        console.error(error); // Add this line
+        res.status(500).send({ error: error.message });
+      }
 };
 
 // Add the register function
@@ -77,8 +78,9 @@ const register = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(error); // Add this line
         res.status(500).send({ error: error.message });
-    }
+      }
 };
 
 

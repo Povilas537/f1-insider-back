@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const articlesController = require('../controllers/articlesController')
+const { authenticateJWT } = require('../middlewares/authMiddleware');
 
 // GET all articles
 router.get('/', articlesController.getArticles)
@@ -9,7 +10,7 @@ router.get('/', articlesController.getArticles)
 router.get('/:id', articlesController.getArticleById)
 
 // POST create new article
-router.post('/', articlesController.createArticle)
+router.post('/', authenticateJWT, articlesController.createArticle);
 
 // PUT update article
 router.put('/:id', articlesController.updateArticle)
