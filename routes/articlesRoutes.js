@@ -1,21 +1,16 @@
-const express = require('express')
-const router = express.Router()
-const articlesController = require('../controllers/articlesController')
-const { authenticateJWT } = require('../middlewares/authMiddleware');
+const express = require('express');
+const router = express.Router();
+const articlesController = require('../controllers/articlesController');
+const { authenticateJWT, authorizeRole } = require('../middlewares/authMiddleware');
+const { authorizeOwnerOrAdmin } = require('../middlewares/articleAuthMiddleware');
 
-// GET all articles
-router.get('/', articlesController.getArticles)
+// Public
+router.get('/', articlesController.getArticles);
+router.get('/:id', articlesController.getArticleById);
 
-// GET article by ID
-router.get('/:id', articlesController.getArticleById)
+// Protected
+router.post('/', authenticateJWT, authorizeRole(['author', 'admin']), articlesController.createArticle);
+router.put('/:id', authenticateJWT, authorizeOwnerOrAdmin, articlesController.updateArticle);
+router.delete('/:id', authenticateJWT, authorizeOwnerOrAdmin, articlesController.deleteArticle);
 
-// POST create new article
-router.post('/', authenticateJWT, articlesController.createArticle);
-
-// PUT update article
-router.put('/:id', articlesController.updateArticle)
-
-// DELETE article
-router.delete('/:id', articlesController.deleteArticle)
-
-module.exports = router
+module.exports = router;

@@ -1,9 +1,8 @@
 // config/roles.js
 const ROLES = {
-    ADMIN: 'admin',
-    USER: 'user',
-    MODERATOR: 'moderator', // if you want more roles
-  };
-  
-  module.exports = ROLES;
-  
+  ADMIN: 'admin',
+  USER: 'user',
+  SUBSCRIBER: 'subscriber',
+  AUTHOR: 'author'
+};
+module.exports = ROLES;

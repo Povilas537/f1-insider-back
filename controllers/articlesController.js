@@ -31,19 +31,18 @@ const getArticleById = async (req, res, next) => {
     }
   };
 // Create article
-const createArticle = async (req, res, next) => {
-    try {
-      // Add validation here if needed
-      const article = new Article({
-        ...req.body,
-        author: req.user.id // Set the author to the authenticated user's ID
-      });
-      await article.save();
-      res.status(201).json({ data: article });
-    } catch (error) {
-      next(error);
-    }
-  };
+const createArticle = async (req, res) => {
+  try {
+    const article = new Article({
+      ...req.body,
+      author: req.user.id // Set from JWT payload
+    });
+    await article.save();
+    res.send(article);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
 // Update article
 const updateArticle = async (req, res, next) => {
   try {
@@ -62,19 +61,21 @@ const updateArticle = async (req, res, next) => {
   }
 };
 
-// Delete article
-const deleteArticle = async (req, res, next) => {
+const deleteArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedArticle = await Article.findByIdAndDelete(id);
+    const deletedArticle = await Article.findOneAndDelete({ _id: id });
+    
     if (!deletedArticle) {
-      return res.status(404).json({ error: 'Article not found' });
+      return res.status(404).send({ error: 'Article not found' });
     }
-    res.status(200).json({ message: 'Article was removed', data: deletedArticle });
+    
+    res.send({ message: 'Article and its comments were removed', data: deletedArticle });
   } catch (error) {
-    next(error);
+    res.status(500).send(error);
   }
 };
+
 
 module.exports = {
   getArticles,

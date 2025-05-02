@@ -4,7 +4,9 @@ const {
   getUserById,
   updateUser,
   deleteUser,
-  changeUserRole
+  changeUserRole,
+  subscribeToNewsletter
+
 } = require('../controllers/usersController');
 const {
   authenticateJWT,
@@ -28,5 +30,7 @@ router.delete('/:id', authenticateJWT, authorizeRole(['admin']), deleteUser);
 
 // Only admins can change user roles
 router.patch('/:id/role', authenticateJWT, authorizeRole(['admin']), changeUserRole);
+
+router.post('/subscribe', authenticateJWT, subscribeToNewsletter);
 
 module.exports = router;

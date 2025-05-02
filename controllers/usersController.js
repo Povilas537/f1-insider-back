@@ -1,6 +1,7 @@
 const ROLES = require('../config/roles');
 const User = require('../models/userModel')
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 
 const getUsers = async (req, res) => {
@@ -82,36 +83,61 @@ const deleteUser = async (req, res) => {
 
 const changeUserRole = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { role } = req.body;
-
-        // Validate the role
-        if (!Object.values(ROLES).includes(role)) {
-            return res.status(400).json({ message: 'Invalid role' });
-        }
-
-        // Update the user's role
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            { role },
-            { new: true, runValidators: true }
-        ).select('-password');
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.json({ message: 'Role updated successfully', user: updatedUser });
+      const { id } = req.params;
+      const { role } = req.body;
+      if (!Object.values(ROLES).includes(role)) {
+        return res.status(400).json({ message: 'Invalid role' });
+      }
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        { role },
+        { new: true, runValidators: true }
+      ).select('-password');
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.json({ message: 'Role updated successfully', user: updatedUser });
     } catch (error) {
-        res.status(500).json({ message: 'Role change failed', error: error.message });
+      res.status(500).json({ message: 'Role change failed', error: error.message });
     }
-};
+  };
 
+  // controllers/usersController.js
+// controllers/usersController.js
+const subscribeToNewsletter = async (req, res) => {
+    try {
+      // Update user role
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.id,
+        { role: 'subscriber' },
+        { new: true }
+      ).select('-password');
+      
+      // Generate a new token with updated role
+      const token = jwt.sign(
+        { id: updatedUser._id, role: 'subscriber' },
+        process.env.JWT_SECRET,
+        { expiresIn: '3h' }
+      );
+      
+      res.status(200).json({ 
+        message: 'Successfully subscribed to newsletter',
+        user: updatedUser,
+        token: token // Send new token
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
+  
+  
 module.exports = {
     getUsers,
     getUserById,
     createUser,
     updateUser,
     deleteUser,
-    changeUserRole
+    changeUserRole,
+    subscribeToNewsletter
 }
