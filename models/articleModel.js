@@ -3,7 +3,21 @@ const Comment = require('./commentModel'); // Import Comment model
 
 const articleSchema = new mongoose.Schema({
   title:    { type: String, required: true },
-  content:  { type: String, required: true },
+  content: { 
+    type: String,
+    required: true,
+    validate: {
+      validator: function(v) {
+        try {
+          const parsed = JSON.parse(v);
+          return !!parsed.blocks && Array.isArray(parsed.blocks);
+        } catch {
+          return false;
+        }
+      },
+      message: 'Content must be valid Editor.js JSON format'
+    }
+  },
   imageUrl: { type: String },
   author:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   category: { type: String, enum: ['news', 'analysis', 'interview'], default: 'news' },

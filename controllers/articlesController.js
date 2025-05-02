@@ -31,21 +31,33 @@ const getArticleById = async (req, res, next) => {
     }
   };
 // Create article
+// In createArticle controller
 const createArticle = async (req, res) => {
   try {
+    // Validate Editor.js content format
+    if (typeof req.body.content !== 'string' || !req.body.content.startsWith('{')) {
+      return res.status(400).send({ error: 'Invalid content format' });
+    }
+
     const article = new Article({
       ...req.body,
-      author: req.user.id // Set from JWT payload
+      author: req.user.id
     });
+    
     await article.save();
     res.send(article);
   } catch (error) {
     res.status(500).send(error);
   }
 };
-// Update article
+// In updateArticle controller
 const updateArticle = async (req, res, next) => {
   try {
+    // Validate Editor.js content format
+    if (req.body.content && (typeof req.body.content !== 'string' || !req.body.content.startsWith('{'))) {
+      return res.status(400).json({ error: 'Invalid content format' });
+    }
+
     const { id } = req.params;
     const updatedArticle = await Article.findByIdAndUpdate(
       id,
@@ -60,7 +72,6 @@ const updateArticle = async (req, res, next) => {
     next(error);
   }
 };
-
 const deleteArticle = async (req, res) => {
   try {
     const { id } = req.params;
