@@ -2,6 +2,7 @@ const express = require('express')
 const process = require('process')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const path = require('path');
 
 require('dotenv').config()
 require('./db')
@@ -25,6 +26,7 @@ const racesRoutes = require('./routes/racesRoutes')
 const usersRoutes = require('./routes/usersRoutes')
 const standingsRoutes = require('./routes/standingsRoutes')
 const authRoutes = require('./routes/authRoutes')
+const uploadRoutes = require('./routes/uploadRoutes');
 
 app.use('/articles', articlesRoutes)
 app.use('/comments', commentsRoutes)
@@ -34,5 +36,8 @@ app.use('/races', racesRoutes)
 app.use('/users', usersRoutes)
 app.use('/standings', standingsRoutes)
 app.use('/auth', authRoutes)
+app.use('/', uploadRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 const PORT = process.env.PORT || 5001
 app.listen(PORT, () => console.log('Server is running on port: '.italic.brightMagenta + `${PORT}`.italic.yellow))
