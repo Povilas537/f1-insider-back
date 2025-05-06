@@ -5,7 +5,11 @@ const driverSchema = new mongoose.Schema({
   team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' },
   nationality: { type: String },
   photoUrl: { type: String },
-  
+  number: { type: Number },
+  dateOfBirth: { type: String },
+  biography: { type: String },
+  careerStart: { type: Number },
+  gallery: [{ type: String }],
   // Career stats (lifetime totals)
   careerStats: {
     starts: { type: Number, default: 0, min: 0 },
@@ -14,7 +18,6 @@ const driverSchema = new mongoose.Schema({
     fastestLaps: { type: Number, default: 0, min: 0 },
     points: { type: Number, default: 0, min: 0 }
   },
-  
   // Season stats (unchanged)
   seasonStats: {
     starts: { type: Number, default: 0, min: 0 },
@@ -23,8 +26,7 @@ const driverSchema = new mongoose.Schema({
     fastestLaps: { type: Number, default: 0, min: 0 },
     points: { type: Number, default: 0, min: 0 }
   },
-  
-  // NEW: Initial career stats for reset functionality
+  // Initial career stats for reset functionality
   initialCareerStats: {
     starts: { type: Number, default: 0 },
     wins: { type: Number, default: 0 },
@@ -33,5 +35,6 @@ const driverSchema = new mongoose.Schema({
     points: { type: Number, default: 0 }
   }
 });
+
 
 module.exports = mongoose.model('Driver', driverSchema);
