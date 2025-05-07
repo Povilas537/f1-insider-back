@@ -1,10 +1,18 @@
-const express = require('express')
-const router = express.Router()
-const standingsController = require('../controllers/standingsController')
+const express = require('express');
+const router = express.Router();
+const standingsController = require('../controllers/standingsController');
+const { authenticateJWT, authorizeRole } = require('../middlewares/authMiddleware');
+const ROLES = require('../config/roles');
 
-// Example: GET driver standings
-router.get('/drivers', standingsController.getDriverStandings)
-// Example: GET team standings
-router.get('/teams', standingsController.getTeamStandings)
+// Public routes
+router.get('/drivers', standingsController.getDriverStandings);
+router.get('/teams', standingsController.getTeamStandings);
 
-module.exports = router
+// Admin-only routes
+router.post('/recalculate', 
+  authenticateJWT, 
+  authorizeRole([ROLES.ADMIN]), 
+  standingsController.recalculateAllStandings
+);
+
+module.exports = router;

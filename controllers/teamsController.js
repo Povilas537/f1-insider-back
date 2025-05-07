@@ -2,35 +2,48 @@ const Team = require('../models/teamModel');
 const Driver = require('../models/driverModel');
 const ROLES = require('../config/roles');
 
-// Get all teams with populated drivers
 const getTeams = async (req, res) => {
     try {
-        const teams = await Team.find().populate('drivers', 'name nationality');
+        const teams = await Team.find()
+          .populate('drivers', 'name nationality photoUrl')
+          .select('name logoUrl country points description teamPrincipal');
         res.send(teams);
     } catch (error) {
         res.status(500).send(error);
     }
 }
 
-// Get team by ID with populated drivers
 const getTeamById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const team = await Team.findById(id).populate('drivers');
-        if (!team) {
-            return res.status(404).send({ error: 'Team not found' });
-        }
-        res.send(team);
+      const { id } = req.params;
+      const team = await Team.findById(id).populate({
+        path: 'drivers',
+        select: 'name photoUrl points wins podiums nationality number'
+      });
+      if (!team) {
+        return res.status(404).send({ error: 'Team not found' });
+      }
+      res.send(team);
     } catch (error) {
-        res.status(500).send(error);
+      res.status(500).send(error);
     }
-}
-
+  }
+  
 // Create team (admin only)
 const createTeam = async (req, res) => {
     try {
         // Auth check happens in middleware
-        const team = new Team(req.body);
+        // In createTeam
+    const team = new Team({
+        name: req.body.name,
+        logoUrl: req.body.logoUrl,
+        country: req.body.country,
+        foundation: req.body.foundation,
+        description: req.body.description,
+        carModel: req.body.carModel,
+        teamPrincipal: req.body.teamPrincipal,
+        gallery: req.body.gallery || []
+    });
         await team.save();
         res.status(201).send(team);
     } catch (error) {
@@ -42,11 +55,19 @@ const createTeam = async (req, res) => {
 const updateTeam = async (req, res) => {
     try {
         const { id } = req.params;
+        const updates = {...req.body};
+        
+        // Optional: validate gallery is an array
+        if (updates.gallery && !Array.isArray(updates.gallery)) {
+            return res.status(400).send({ error: 'Gallery must be an array of image URLs' });
+        }
+        
         const updatedTeam = await Team.findByIdAndUpdate(
             id,
-            req.body,
+            updates,
             { new: true }
         );
+        
         if (!updatedTeam) {
             return res.status(404).send({ error: 'Team not found' });
         }
@@ -56,14 +77,26 @@ const updateTeam = async (req, res) => {
     }
 }
 
-// Delete team (admin only)
+
 const deleteTeam = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedTeam = await Team.findByIdAndDelete(id);
-        if (!deletedTeam) {
+        
+        // Find the team first
+        const teamToDelete = await Team.findById(id);
+        if (!teamToDelete) {
             return res.status(404).send({ error: 'Team not found' });
         }
+        
+        // Update all drivers to remove the team reference
+        await Driver.updateMany(
+            { team: id },
+            { $set: { team: null } }
+        );
+        
+        // Now delete the team
+        const deletedTeam = await Team.findByIdAndDelete(id);
+        
         res.send({ message: 'Team was removed', data: deletedTeam });
     } catch (error) {
         res.status(500).send(error);
@@ -136,6 +169,54 @@ const removeDriverFromTeam = async (req, res) => {
     }
 }
 
+// Add gallery image to team (admin only)
+const addGalleryImage = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { imageUrl } = req.body;
+      
+      const team = await Team.findById(id);
+      if (!team) {
+        return res.status(404).send({ error: 'Team not found' });
+      }
+      
+      // Initialize gallery array if it doesn't exist
+      if (!team.gallery) {
+        team.gallery = [];
+      }
+      
+      team.gallery.push(imageUrl);
+      await team.save();
+      
+      res.send(team);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  };
+  
+  // Remove gallery image from team (admin only)
+  const removeGalleryImage = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { imageUrl } = req.body;
+      
+      const team = await Team.findById(id);
+      if (!team) {
+        return res.status(404).send({ error: 'Team not found' });
+      }
+      
+      if (team.gallery) {
+        team.gallery = team.gallery.filter(url => url !== imageUrl);
+        await team.save();
+      }
+      
+      res.send(team);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  };
+  
+
 module.exports = {
     getTeams,
     getTeamById,
@@ -143,5 +224,7 @@ module.exports = {
     updateTeam,
     deleteTeam,
     addDriverToTeam,
-    removeDriverFromTeam
+    removeDriverFromTeam,
+    addGalleryImage,
+    removeGalleryImage
 }
