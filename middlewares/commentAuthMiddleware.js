@@ -4,10 +4,9 @@ const authorizeCommentOwnerOrAdmin = async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.id);
     if (!comment) return res.status(404).json({ message: 'Comment not found' });
-    
-    // Check if user is admin or the comment author
+
     if (req.user.role === 'admin' || comment.user.toString() === req.user.id) {
-      req.comment = comment; // Add comment to request for controllers
+      req.comment = comment; 
       return next();
     }
     

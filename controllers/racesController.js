@@ -2,9 +2,9 @@ const Race = require('../models/raceModel');
 const Driver = require('../models/driverModel');
 const Team = require('../models/teamModel');
 
-// Points calculation system
+
 const calculatePoints = (position) => {
-  // F1 standard points system
+
   const pointsSystem = {
     1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
     6: 8, 7: 6, 8: 4, 9: 2, 10: 1
@@ -101,7 +101,6 @@ const deleteRace = async (req, res) => {
 
 
 
-// Get past races (completed races)
 const getPastRaces = async (req, res) => {
     try {
       const currentDate = new Date();
@@ -115,7 +114,7 @@ const getPastRaces = async (req, res) => {
             select: 'name'
           }
         })
-        .sort('-date'); // Most recent first
+        .sort('-date'); 
       res.send(races);
     } catch (error) {
       res.status(500).send(error);
@@ -135,15 +134,14 @@ const getPastRaces = async (req, res) => {
             select: 'name'
           }
         })
-        .sort('date'); // Closest first
+        .sort('date');
       res.send(races);
     } catch (error) {
       res.status(500).send(error);
     }
   };
 
-// In racesController.js, inside the updateRaceResults function
-// After calculating points but before updating the driver
+
 
 const updateRaceResults = async (req, res) => {
     try {
@@ -154,7 +152,7 @@ const updateRaceResults = async (req, res) => {
       if (!race) {
         return res.status(404).send({ error: 'Race not found' });
       }
-          // Check if race date has passed
+         
     const currentDate = new Date();
     const raceDate = new Date(race.date);
     
@@ -163,16 +161,16 @@ const updateRaceResults = async (req, res) => {
         error: 'Cannot enter results for a race that has not happened yet' 
       });
     }
+    
       
-      // Mark race as completed
       race.status = 'completed';
       race.winner = winner;
       race.fastestLap = fastestLap;
       
-      // Process results with points calculation
+      
       const processedResults = results.map(result => {
         let points = calculatePoints(result.position);
-        // Add fastest lap point (if applicable)
+        
         points = calculatePoints(result.position);
         return {
           driver: result.driver,
@@ -184,11 +182,9 @@ const updateRaceResults = async (req, res) => {
       race.results = processedResults;
       await race.save();
       
-                // Update driver stats - points, wins, and podiums
-          // Inside updateRaceResults function
           for (const result of processedResults) {
             const driverUpdate = { 
-              // Increment both sets of stats
+          
               $inc: {
                 'careerStats.points': result.points,
                 'seasonStats.points': result.points,
@@ -197,20 +193,19 @@ const updateRaceResults = async (req, res) => {
               } 
             };
             
-            // Check for win (position 1)
+            
             if (result.position === 1) {
               driverUpdate.$inc['careerStats.wins'] = 1;
               driverUpdate.$inc['seasonStats.wins'] = 1;
               driverUpdate.$inc['careerStats.podiums'] = 1;
               driverUpdate.$inc['seasonStats.podiums'] = 1;
             } 
-            // Check for podium (positions 2-3)
+            
             else if (result.position === 2 || result.position === 3) {
               driverUpdate.$inc['careerStats.podiums'] = 1;
               driverUpdate.$inc['seasonStats.podiums'] = 1;
             }
-            
-            // Check for fastest lap
+      
             if (fastestLap && fastestLap === result.driver) {
               driverUpdate.$inc['careerStats.fastestLaps'] = 1;
               driverUpdate.$inc['seasonStats.fastestLaps'] = 1;
@@ -220,20 +215,20 @@ const updateRaceResults = async (req, res) => {
           }
 
       
-     // Update team standings by aggregating driver points
+     
 const updatedDrivers = await Driver.find().populate('team');
 const teamPoints = {};
 
-// Group driver points by team
+
 for (const driver of updatedDrivers) {
   if (driver.team) {
     const teamId = driver.team._id.toString();
-    // Use seasonStats.points instead of direct points
+
     teamPoints[teamId] = (teamPoints[teamId] || 0) + driver.seasonStats.points;
   }
 }
 
-// Update each team's points
+
 for (const [teamId, points] of Object.entries(teamPoints)) {
   await Team.findByIdAndUpdate(
     teamId,

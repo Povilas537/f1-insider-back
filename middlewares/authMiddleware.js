@@ -14,7 +14,6 @@ const authenticateJWT = (req, res, next) => {
     }
 };
 
-// authMiddleware.js - Add better error messages
 const authorizeRole = (roles) => (req, res, next) => {
     if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
     if (!roles.includes(req.user.role)) {

@@ -10,7 +10,7 @@ const driverSchema = new mongoose.Schema({
   biography: { type: String },
   careerStart: { type: Number },
   gallery: [{ type: String }],
-  // Career stats (lifetime totals)
+ 
   careerStats: {
     starts: { type: Number, default: 0, min: 0 },
     wins: { type: Number, default: 0, min: 0 },
@@ -18,7 +18,7 @@ const driverSchema = new mongoose.Schema({
     fastestLaps: { type: Number, default: 0, min: 0 },
     points: { type: Number, default: 0, min: 0 }
   },
-  // Season stats (unchanged)
+
   seasonStats: {
     starts: { type: Number, default: 0, min: 0 },
     wins: { type: Number, default: 0, min: 0 },
@@ -26,7 +26,7 @@ const driverSchema = new mongoose.Schema({
     fastestLaps: { type: Number, default: 0, min: 0 },
     points: { type: Number, default: 0, min: 0 }
   },
-  // Initial career stats for reset functionality
+ 
   initialCareerStats: {
     starts: { type: Number, default: 0 },
     wins: { type: Number, default: 0 },

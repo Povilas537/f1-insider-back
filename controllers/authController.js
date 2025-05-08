@@ -1,4 +1,4 @@
-// authController.js
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
@@ -9,11 +9,11 @@ const login = async (req, res) => {
       const { email, password } = req.body;
       const user = await User.findOne({ email });
       
-      if (!user) return res.status(401).send({ error: 'Invalid credentials' }); // Fix missing }
+      if (!user) return res.status(401).send({ error: 'Invalid credentials' }); 
   
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).send({ error: 'Invalid credentials' }); // Fix missing }
-        // Generate JWT token
+      if (!isMatch) return res.status(401).send({ error: 'Invalid credentials' }); 
+ 
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,
@@ -30,12 +30,12 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error); // Add this line
+        console.error(error); 
         res.status(500).send({ error: error.message });
       }
 };
 
-// Add the register function
+
 const register = async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -73,7 +73,7 @@ const register = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error); // Add this line
+        console.error(error); 
         res.status(500).send({ error: error.message });
       }
 };

@@ -29,11 +29,10 @@ const getTeamById = async (req, res) => {
     }
   }
   
-// Create team (admin only)
+
 const createTeam = async (req, res) => {
     try {
-        // Auth check happens in middleware
-        // In createTeam
+   
     const team = new Team({
         name: req.body.name,
         logoUrl: req.body.logoUrl,
@@ -51,13 +50,13 @@ const createTeam = async (req, res) => {
     }
 }
 
-// Update team (admin only)
+
 const updateTeam = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = {...req.body};
         
-        // Optional: validate gallery is an array
+     
         if (updates.gallery && !Array.isArray(updates.gallery)) {
             return res.status(400).send({ error: 'Gallery must be an array of image URLs' });
         }
@@ -82,19 +81,19 @@ const deleteTeam = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Find the team first
+     
         const teamToDelete = await Team.findById(id);
         if (!teamToDelete) {
             return res.status(404).send({ error: 'Team not found' });
         }
         
-        // Update all drivers to remove the team reference
+        
         await Driver.updateMany(
             { team: id },
             { $set: { team: null } }
         );
         
-        // Now delete the team
+ 
         const deletedTeam = await Team.findByIdAndDelete(id);
         
         res.send({ message: 'Team was removed', data: deletedTeam });
@@ -103,12 +102,12 @@ const deleteTeam = async (req, res) => {
     }
 }
 
-// Add driver to team (admin only)
+
 const addDriverToTeam = async (req, res) => {
     try {
         const { teamId, driverId } = req.body;
         
-        // Find the team and the driver
+        
         const team = await Team.findById(teamId);
         const driver = await Driver.findById(driverId);
         
@@ -118,17 +117,16 @@ const addDriverToTeam = async (req, res) => {
             });
         }
         
-        // Add driver to team if not already added
         if (!team.drivers.includes(driverId)) {
             team.drivers.push(driverId);
             await team.save();
             
-            // Update driver's team reference
+          
             driver.team = teamId;
             await driver.save();
         }
         
-        // Return team with populated drivers
+       
         const updatedTeam = await Team.findById(teamId).populate('drivers');
         res.send(updatedTeam);
     } catch (error) {
@@ -136,12 +134,11 @@ const addDriverToTeam = async (req, res) => {
     }
 }
 
-// Remove driver from team (admin only)
 const removeDriverFromTeam = async (req, res) => {
     try {
         const { teamId, driverId } = req.body;
         
-        // Find the team and driver
+        
         const team = await Team.findById(teamId);
         const driver = await Driver.findById(driverId);
         
@@ -152,16 +149,15 @@ const removeDriverFromTeam = async (req, res) => {
         if (!driver) {
             return res.status(404).send({ error: 'Driver not found' });
         }
-        
-        // Remove driver from team
+   
         team.drivers = team.drivers.filter(id => id.toString() !== driverId);
         await team.save();
         
-        // Remove team reference from driver
+      
         driver.team = null;
         await driver.save();
+      
         
-        // Return updated team with populated drivers
         const updatedTeam = await Team.findById(teamId).populate('drivers');
         res.send(updatedTeam);
     } catch (error) {
@@ -169,7 +165,6 @@ const removeDriverFromTeam = async (req, res) => {
     }
 }
 
-// Add gallery image to team (admin only)
 const addGalleryImage = async (req, res) => {
     try {
       const { id } = req.params;
@@ -180,7 +175,7 @@ const addGalleryImage = async (req, res) => {
         return res.status(404).send({ error: 'Team not found' });
       }
       
-      // Initialize gallery array if it doesn't exist
+  
       if (!team.gallery) {
         team.gallery = [];
       }
@@ -194,7 +189,6 @@ const addGalleryImage = async (req, res) => {
     }
   };
   
-  // Remove gallery image from team (admin only)
   const removeGalleryImage = async (req, res) => {
     try {
       const { id } = req.params;

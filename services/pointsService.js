@@ -1,4 +1,4 @@
-// F1 standard points system
+
 const POINTS_SYSTEM = {
     1: 25,
     2: 18,
@@ -14,8 +14,6 @@ const POINTS_SYSTEM = {
   
 
   
-// After
-// pointsService.js
 const calculateDriverPoints = (position) => {
   return POINTS_SYSTEM[position] || 0;
 };

@@ -10,16 +10,16 @@ const teamSchema = new mongoose.Schema({
   description: { type: String },
 
   teamPrincipal: { type: String },
-  gallery:     [{ type: String }],  // Array of image URLs
+  gallery:     [{ type: String }], 
   
-  // New team history fields
+
   fullName:    { type: String },
   base:        { type: String },
 
   technicalChief: { type: String },
-  chassis:     { type: String },  // Can use this instead of carModel if you prefer
+  chassis:     { type: String },  
   powerUnit:   { type: String },
-  firstEntry:  { type: Number },  // Year of first F1 entry
+  firstEntry:  { type: Number },  
   worldChampionships: { type: Number, default: 0 },
 
 }, {

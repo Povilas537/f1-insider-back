@@ -28,7 +28,7 @@ const getUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        // Hash password before saving
+  
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const userData = {...req.body, password: hashedPassword};
         
@@ -46,7 +46,7 @@ const updateUser = async (req, res) => {
         const { id } = req.params;
         const updates = {...req.body};
         
-        // Hash password if it's being updated
+  
         if (updates.password) {
             updates.password = await bcrypt.hash(updates.password, 10);
         }
@@ -102,18 +102,16 @@ const changeUserRole = async (req, res) => {
     }
   };
 
-  // controllers/usersController.js
-// controllers/usersController.js
 const subscribeToNewsletter = async (req, res) => {
     try {
-      // Update user role
+  
       const updatedUser = await User.findByIdAndUpdate(
         req.user.id,
         { role: 'subscriber' },
         { new: true }
       ).select('-password');
       
-      // Generate a new token with updated role
+    
       const token = jwt.sign(
         { id: updatedUser._id, role: 'subscriber' },
         process.env.JWT_SECRET,
@@ -123,7 +121,7 @@ const subscribeToNewsletter = async (req, res) => {
       res.status(200).json({ 
         message: 'Successfully subscribed to newsletter',
         user: updatedUser,
-        token: token // Send new token
+        token: token 
       });
     } catch (error) {
       res.status(500).json({ message: error.message });

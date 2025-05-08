@@ -1,4 +1,3 @@
-// models/userModel.js
 const mongoose = require('mongoose');
 const ROLES = require('../config/roles');
 

@@ -241,13 +241,13 @@ const resetDriverCareerStats = async (req, res) => {
       points: 0
     };
     
-    // Process each race
+    
     for (const race of races) {
       for (const result of race.results) {
-        // Only process results for this specific driver
+  
         if (result.driver.toString() !== id) continue;
         
-        // Add stats
+      
         additionalStats.starts++;
         additionalStats.points += result.points || 0;
         
@@ -257,15 +257,14 @@ const resetDriverCareerStats = async (req, res) => {
         } else if (result.position === 2 || result.position === 3) {
           additionalStats.podiums++;
         }
-        
-        // Check for fastest lap
+       
         if (race.fastestLap && race.fastestLap.toString() === id) {
           additionalStats.fastestLaps++;
         }
       }
     }
     
-    // Update driver with combined stats (initial + race results)
+   
     if (Object.values(additionalStats).some(val => val > 0)) {
       await Driver.findByIdAndUpdate(
         id,
@@ -294,7 +293,6 @@ const resetDriverCareerStats = async (req, res) => {
 };
 
 
-// Add a function to update initialCareerStats
 const updateInitialCareerStats = async (req, res) => {
   try {
     const { id } = req.params;

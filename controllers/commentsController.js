@@ -26,7 +26,7 @@ const getCommentsByArticleId = async (req, res) => {
   try {
     const { articleId } = req.params;
     const comments = await Comment.find({ article: articleId })
-      .populate('user', '_id username') // Include _id explicitly
+      .populate('user', '_id username') 
       .sort({ createdAt: -1 });
     res.send(comments);
   } catch (error) {
@@ -43,15 +43,14 @@ const createComment = async (req, res) => {
     const comment = new Comment(commentData);
     await comment.save();
     
-    // Populate user before sending response
+  
     const populatedComment = await Comment.findById(comment._id)
       .populate('user', '_id username');
     res.status(201).send(populatedComment);
   } catch (error) {
     res.status(500).send(error);
   }
-};
-// Update updateComment
+}
 const updateComment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -63,7 +62,7 @@ const updateComment = async (req, res) => {
     comment.content = req.body.content;
     const updatedComment = await comment.save();
     
-    // Populate user info before sending response
+   
     const populatedComment = await Comment.findById(updatedComment._id)
       .populate('user', '_id username');
     res.send(populatedComment);
@@ -71,7 +70,7 @@ const updateComment = async (req, res) => {
     res.status(500).send(error);
   }
 };
-// Update deleteComment
+
 const deleteComment = async (req, res) => {
   try {
     const { id } = req.params;

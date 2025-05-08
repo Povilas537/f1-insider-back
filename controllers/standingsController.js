@@ -9,11 +9,11 @@ const getDriverStandings = async (req, res) => {
       .populate('team', 'name logoUrl')
       .sort('-seasonStats.points');
 
-    // Add position property to each driver
+
     const driversWithPosition = drivers.map((driver, index) => {
       const driverObj = driver.toObject();
       driverObj.position = index + 1;
-      driverObj.points = driver.seasonStats.points; // Add points at top level for frontend
+      driverObj.points = driver.seasonStats.points; 
       return driverObj;
     });
 
@@ -27,10 +27,9 @@ const getDriverStandings = async (req, res) => {
 const getTeamStandings = async (req, res) => {
   try {
     const teams = await Team.find()
-      .select('name points logoUrl')  // Added logoUrl
+      .select('name points logoUrl')  
       .sort('-points');
-    
-    // Add position property to each team
+  
     const teamsWithPosition = teams.map((team, index) => {
       const teamObj = team.toObject();
       teamObj.position = index + 1;
@@ -44,7 +43,6 @@ const getTeamStandings = async (req, res) => {
 };
 
 
-// Points calculation system (same as in racesController)
 const calculatePoints = (position) => {
   if (position === undefined || position === null) return 0;
   
@@ -55,10 +53,9 @@ const calculatePoints = (position) => {
   return pointsSystem[position] || 0;
 };
 
-// Reset and recalculate all standings
 const recalculateAllStandings = async (req, res) => {
   try {
-    // Reset all driver points to zero
+  
     await Driver.updateMany({}, { 
       'seasonStats.points': 0,
       'seasonStats.podiums': 0,
@@ -66,16 +63,16 @@ const recalculateAllStandings = async (req, res) => {
       'seasonStats.fastestLaps': 0,
       'seasonStats.starts': 0
     });
-  // Add this to reset TEAM points:
+
   await Team.updateMany({}, { points: 0 });
 
     
-    // Get all completed races
+ 
     const races = await Race.find({ status: 'completed' })
       .sort('date')
       .populate('results.driver');
     
-    // Recalculate points from each race
+ 
     for (const race of races) {
       for (const result of race.results) {
         const isFastestLap = race.fastestLap && 
@@ -84,7 +81,7 @@ const recalculateAllStandings = async (req, res) => {
         
         const totalPoints = points ;
         
-        // Inside the race loop, after calculating points
+ 
         await Driver.findByIdAndUpdate(
           result.driver._id,
           { 
@@ -102,21 +99,21 @@ const recalculateAllStandings = async (req, res) => {
     }
     }
     
-    // Update team points (aggregate from drivers)
+   
 
        const drivers = await Driver.find().populate('team');
       const teamPoints = {};
       drivers.forEach(driver => {
         if (driver.team) {
           const teamId = driver.team._id.toString();
-          // Use seasonStats.points instead of direct points
+ 
           const driverPoints = driver.seasonStats?.points || 0;
           teamPoints[teamId] = (teamPoints[teamId] || 0) + driverPoints;
         }
       });
 
     for (const [teamId, points] of Object.entries(teamPoints)) {
-      // Ensure points is a valid number
+    
       const validPoints = isNaN(points) ? 0 : points;
       await Team.findByIdAndUpdate(
         teamId,

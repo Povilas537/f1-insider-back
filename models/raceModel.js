@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Driver = require('./driverModel'); // Assuming you have a driver model
+const Driver = require('./driverModel');
 
 
 const raceSchema = new mongoose.Schema({
@@ -12,7 +12,7 @@ const raceSchema = new mongoose.Schema({
     enum: ['upcoming', 'completed'], 
     default: 'upcoming' 
   },
-  imageUrl: { type: String }, // Add this new field
+  imageUrl: { type: String },
   winner: { type: mongoose.Schema.Types.ObjectId, ref: 'Driver' },
   fastestLap: { type: mongoose.Schema.Types.ObjectId, ref: 'Driver' },
   results: [{

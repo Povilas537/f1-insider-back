@@ -1,4 +1,4 @@
-// config/roles.js
+
 const ROLES = {
   ADMIN: 'admin',
   USER: 'user',
